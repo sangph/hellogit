@@ -1,0 +1,135 @@
+docker rm -f gp_admin
+docker rm -f gp_api 
+docker rm -f gp_partner
+docker rm -f gp_storefront
+docker rm -f worker_verify
+docker rm -f worker_settle
+docker rm -f worker_sendmail
+docker rm -f worker_callback
+docker rm -f worker_general
+
+docker rm -f gp_crontab
+docker rm -f gp_schedule
+docker rm -f gp_widget
+
+docker rmi gopay_docker_base -f
+docker rmi gopay_docker_admin -f
+docker rmi gopay_docker_api -f
+docker rmi gopay_docker_partner -f
+docker rmi gopay_storefront -f
+docker rmi gopay_docker_worker -f
+docker rmi gopay_docker_crontab -f
+docker rmi gopay_docker_schedule -f
+docker rmi gopay_widget -f
+
+docker rm -f demo_api
+docker rm -f demo_worker_callback
+docker rm -f demo_worker_verify
+docker rm -f demo_worker_sendmail 
+docker rm -f demo_gp_ui
+
+docker rmi gopay_docker_api_demo -f
+docker rmi gopay_docker_worker_demo -f
+
+sh build-base.sh
+docker-compose up -d --no-recreate
+
+
+celery -A config worker -l INFO
+
+cd /opt/gopay/www/apps/gp_api/
+celery beat -A config --schedule=/tmp/celerybeat-schedule -l INFO
+
+docker cp gunicorn.sh gp_admin:/data/gopay/gunicorn.sh
+docker cp supervisord.conf gp_admin:/etc/supervisord.conf
+docker cp default.conf gp_admin:/etc/nginx/conf.d/default.conf
+docker cp run.sh gp_admin:/data/gopay/run.sh
+
+docker cp web_app.py gp_api:/code/gp_api/billing/v5/controller/web_app.py
+
+docker cp web_settings.py gp_api:code/gp_api/billing/v5/views/web_settings.py
+docker cp additional_setting.py gp_admin:/code/gp_admin/config/settings/stage/additional_setting.py
+docker cp web_app.py gp_api:code/gp_api/billing/v5/views/web_app.py
+docker cp product_detail.py gp_api:code/gp_api/billing/v5/views/product_detail.py
+
+docker cp start_purchase.py gp_api:code/gp_api/billing/v5/views/start_purchase.py
+docker cp query_purchases.py gp_api:code/gp_api/billing/v5/views/query_purchases.py
+docker cp callback.py gp_api:code/gp_api/billing/v1/views/callback.py
+
+docker cp product_detail.py gp_api:code/gp_api/billing/v5/views/product_detail.py
+docker cp check_order.py gp_api:code/gp_api/billing/v5/views/check_order.py
+docker cp handle_return.html gp_api:/code/gp_api/templates/billing/v4/handle_return.html
+
+docker cp additional_setting.py gp_api:/code/gp_api/config/settings/stage/additional_setting.py
+docker cp login.html gp_partner:/code/gp_partner/templates/main/login.html
+docker cp urls.py gp_api:/code/gp_api/billing/v3/urls.py
+docker cp urls.py gp_api:/code/gp_api/widgets/v1/urls.py
+
+docker cp urls.py gp_partner:/code/gp_partner/config/urls.py
+docker cp admin.py gp_partner:/code/gp_partner/accounts/admin.py
+
+docker cp search.py gp_partner:/code/gp_partner/finance/views/search.py
+docker cp products.py gp_partner:/code/gp_partner/management/views/products.py
+
+docker cp search.html gp_partner:/code/gp_partner/templates/finance/search.html
+docker cp reports.html gp_partner:/code/gp_partner/templates/finance/reports.html
+docker cp news.html gp_partner:/code/gp_partner/templates/general/news.html
+docker cp models.py gp_partner:/code/gp_partner/general/models.py
+
+docker cp goods.py gp_api:/code/gp_models/main/goods.py
+docker cp views.py gp_api:/code/gp_api/demo_gs/views.py
+docker cp request.py gp_api:/code/gp_api/demo_gs/goPaySDK/request.py
+
+docker cp app.py gp_admin:/code/gp_models/main/app.py
+docker cp app_bundle.py gp_admin:/code/gp_models/main/app_bundle.py
+
+docker cp web_validate_guid.py gp_api:code/gp_api/billing/v5/views/web_validate_guid.py
+
+docker cp base_settings.py gp_admin:/code/gp_admin/config/settings/base_settings.py
+docker cp home.py gp_admin:/code/gp_admin/dashboard/views/home.py
+docker cp home.html gp_admin:/code/gp_admin/templates/dashboard/home.html
+docker cp transaction.py gp_admin:/code/gp_admin/dashboard/views/transaction.py
+docker cp app_user.py gp_admin:/code/gp_admin/dashboard/views/app_user.py
+
+docker cp bundle_gateway.py gp_api:code/gp_models/main/bundle_gateway.py
+docker cp coda.py gp_api:code/gp_api/helpers/gateways/coda.py
+docker cp centili.py gp_api:code/gp_api/helpers/gateways/centili.py
+docker cp payment_wall.py gp_api:code/gp_api/helpers/gateways/payment_wall.py
+docker cp centili.py gp_api:code/gp_api/widgets/v1/controller/centili.py
+docker cp unibox.py gp_api:code/gp_api/helpers/gateways/unibox.py
+docker cp razer.py gp_api:code/gp_api/helpers/gateways/razer.py
+docker cp centili_price_points.html gp_api:/code/gp_api/templates/widgets/v1/centili_price_points.html
+docker cp xanpay.py gp_api:code/gp_api/widgets/v1/controller/xanpay.py
+
+docker cp test_payment.py gp_api:code/gp_api/widgets/v1/views/test_payment.py
+docker cp goplayplay.html gp_api:/code/gp_api/templates/widgets/v1/goplayplay.html
+docker cp goplayplay.py gp_api:code/gp_api/widgets/v1/views/goplayplay.py
+docker cp goplayplay.py gp_api:code/gp_api/widgets/v1/controller/goplayplay.py
+docker cp goplayplay.py gp_api:code/gp_api/helpers/gateways/goplayplay.py
+
+docker cp additional_setting.py gp_admin:/code/gp_admin/config/settings/stage/additional_setting.py
+docker cp tasks.py worker_sendmail:/code/gp_api/helpers/tasks.py
+docker cp mail_template.html worker_sendmail:/code/gp_api/templates/widgets/v1/mail_template.html
+docker cp xanpay.html gp_api:/code/gp_api/templates/widgets/v1/xanpay.html
+docker cp xanpay.py gp_api:code/gp_api/helpers/gateways/xanpay.py
+
+docker cp omise.html gp_api:/code/gp_api/templates/widgets/v1/omise.html
+docker cp omise.py gp_api:code/gp_api/helpers/gateways/omise.py
+docker cp omise.py gp_api:code/gp_api/widgets/v1/controller/omise.py
+
+docker cp paypalgw.py gp_api:code/gp_api/helpers/gateways/paypalgw.py
+docker cp paypalgw.py worker_verify:code/gp_api/helpers/gateways/paypalgw.py
+
+
+docker restart gp_api
+docker logs gp_admin --follow
+
+
+
+docker cp generate_app_reports.py gp_crontab:/code/gp_admin/schema/main/management/commands/generate_app_reports.py
+
+--------------------------------
+
+UPDATE appuser_order SET timestamp_tracking=UNIX_TIMESTAMP(created_at)*1000
+
+UPDATE appuser_order SET created_at=updated_at WHERE created_at='0000-00-00 00:00:00.000000'
