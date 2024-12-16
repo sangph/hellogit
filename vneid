@@ -1,0 +1,8 @@
+curl --location 'https://agent-dev.gtel.vn/api/tcdn/biometric-share-info/api/agent/init?code=STB' \
+--header 'request_id: 46131480-961e-4ac2-8e97-0dad3b8bb8bb' \
+--header 'request_time: 1233131' \
+--header 'Content-Type: application/json' \
+--header 'api_key: d8946993-c707-41bd-a067-a12b0f4de999' \
+--data '{
+    "citizenPid": "số cccd"
+}
